@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 # from django.shortcuts import HttpResponse
-from BizzSolution.views import home, about
+from StudentService.views import home, about
 
 urlpatterns = [
     path('admin/', admin.site.urls),

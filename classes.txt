@@ -4,7 +4,7 @@ Class-03: Html - start
 Class-04: Variable : Memory alocation with variables
 Class-05: Folder structure and Files: Every file called module. urls.py | admin | home | about
 Class-06: variable Rules with some practice problems. https://codeforwin.org/c-programming/basic-programming-practice-problems
-Class-07: 
+Class-07: urls.py > views.py > templates > home.html > about.html
 Class-08: 
 Class-09: 
 Class-10: 

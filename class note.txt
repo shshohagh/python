@@ -5,3 +5,5 @@ pip install Django
 django-admin startproject BizzSolution OR
 python -m django startproject BizzSolution
 python manage.py runserver
+
+python manage.py startapp StudentService
