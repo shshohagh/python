@@ -1,1 +1,7 @@
+cmd
 python -m venv virtual
+virtual\Scripts\activate
+pip install Django
+django-admin startproject BizzSolution OR
+python -m django startproject BizzSolution
+python manage.py runserver
