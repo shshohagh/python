@@ -4,7 +4,7 @@ For the First Time Computer: Create new virtual Environment
 3. virtual\Scripts\activate
 4. pip install Django
 5. python manage.py startproject ProjectName OR
-   python -m django startproject MdSaidulHossain_REF6699_CaloryCounter
+   python -m django startproject CaloryCounter
 6. python manage.py runserver
 
 For Creating new App
@@ -17,4 +17,42 @@ For Existing project
 1. virtual\Scripts\activate
 2. cd BizzSolution
 3. python manage.py runserver
+
+Instructions:
+1. update settings.py : add App Name in INSTALLED_APPS in project folder
+2. Create a folder named templates in Base folder
+3. Create html files for each page in templates folder
+4. Create urls.py in App folder
+5. Define url's for each page at urls.py in App folder
+
+#App/urls.py
+from django.urls import path
+from AppName.views import home, about
+urlpatterns = [
+    path('', home),
+    path('about', about),
+]
+
+6. Update views.py in App folder
+
+#App/views.py
+from django.shortcuts import render
+
+# Create your views here.
+def home(req):
+    return render(req, 'home.html')
+
+def about(req):
+    return render(req, 'about.html')
+
+7. add include in Project/urls.py
+
+#Project/urls.py
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('AppName.urls'))
+]
 

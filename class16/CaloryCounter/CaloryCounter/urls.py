@@ -1,5 +1,5 @@
 """
-URL configuration for MdSaidulHossain_REF6699_CaloryCounter project.
+URL configuration for CaloryCounter project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/6.0/topics/http/urls/
@@ -14,9 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# pyrefly: ignore [missing-import]
 from django.contrib import admin
-from django.urls import path
+# pyrefly: ignore [missing-import]
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('CaloryCounterApp.urls'))
 ]
