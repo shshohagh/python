@@ -56,3 +56,6 @@ urlpatterns = [
     path('', include('AppName.urls'))
 ]
 
+# Database
+1. python manage.py migrate
+2. python manage.py createsuperuser
