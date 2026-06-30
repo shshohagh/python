@@ -3,13 +3,13 @@ For the First Time Computer: Create new virtual Environment
 2. python -m venv virtual
 3. virtual\Scripts\activate
 4. pip install Django
-5. python manage.py startproject BizzSolution OR
-   python -m django startproject BizzSolution
+5. python manage.py startproject ProjectName OR
+   python -m django startproject MdSaidulHossain_REF6699_CaloryCounter
 6. python manage.py runserver
 
 For Creating new App
 1. virtual\Scripts\activate
-2. python manage.py startapp StudentService
+2. python manage.py startapp CaloryCounterApp
 3. cd BizzSolution
 4. python manage.py runserver
 
