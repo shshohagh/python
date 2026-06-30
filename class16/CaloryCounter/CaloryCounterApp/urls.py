@@ -4,5 +4,5 @@ from CaloryCounterApp.views import home, about
 
 urlpatterns = [
     path('', home),
-    path('about', about),
+    path('about/<str:data>/', about),
 ]
