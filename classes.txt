@@ -14,6 +14,6 @@ Class-13: Character > ASCII Table | Nested If
 Class-14: Descusing about Assesment and Question. MCQ:20 ta > Video Time: 0:47 to Written:10 ta
 Class-15: Descusing about Assesment Project
 Class-16: Project: Name_ID_CaloryCounter | App: CaloryCounterApp
-Class-17: 
-Class-18: 
-Class-19:  
+Class-17: Loops: while
+Class-18: def add(x,y): #parameter list | print('ok', x+y)
+Class-19: def my_fn(name= "Bangladesh"): print('Hello', name) | my_fn("India") | my_fn("Nepali") | my_fn() | my_fn("American")
