@@ -5,8 +5,8 @@ Class-04: Variable : Memory alocation with variables
 Class-05: Folder structure and Files: Every file called module. urls.py | admin | home | about
 Class-06: variable Rules with some practice problems. https://codeforwin.org/c-programming/basic-programming-practice-problems
 Class-07: urls.py > views.py > templates > home.html > about.html
-Class-08: 
-Class-09: 
+Class-08: Conditional: Arithmetic, Assignment, Comparison, Boolean Operators, Dependency: if logic: Enter and 2x space for block, condition, keyword, Indentation
+Class-09: Create : Virtual, Project, App.
 Class-10: 
 Class-11: 
 Class-12: 

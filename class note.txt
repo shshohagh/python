@@ -1,9 +1,20 @@
-cmd
-python -m venv virtual
-virtual\Scripts\activate
-pip install Django
-django-admin startproject BizzSolution OR
-python -m django startproject BizzSolution
-python manage.py runserver
+For the First Time Computer: Create new virtual Environment
+1. Open Command Prompt
+2. python -m venv virtual
+3. virtual\Scripts\activate
+4. pip install Django
+5. python manage.py startproject BizzSolution OR
+   python -m django startproject BizzSolution
+6. python manage.py runserver
 
-python manage.py startapp StudentService
+For Creating new App
+1. virtual\Scripts\activate
+2. python manage.py startapp StudentService
+3. cd BizzSolution
+4. python manage.py runserver
+
+For Existing project
+1. virtual\Scripts\activate
+2. cd BizzSolution
+3. python manage.py runserver
+
