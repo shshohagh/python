@@ -7,12 +7,12 @@ Class-06: variable Rules with some practice problems. https://codeforwin.org/c-p
 Class-07: urls.py > views.py > templates > home.html > about.html
 Class-08: Conditional: Arithmetic, Assignment, Comparison, Boolean Operators, Dependency: if logic: Enter and 2x space for block, condition, keyword, Indentation
 Class-09: Create : Virtual, Project, App.
-Class-10: 
-Class-11: 
-Class-12: 
-Class-13: 
-Class-14: 
-Class-15: 
+Class-10: If logic: elif logic: else:
+Class-11: Class-10 Repeat and practice problems
+Class-12: Project > MyApp 
+Class-13: Character > ASCII Table | Nested If
+Class-14: Descusing about Assesment and Question. MCQ:20 ta > Video Time: 0:47 to Written:10 ta
+Class-15: Descusing about Assesment Project
 Class-16: 
 Class-17: 
 Class-18: 
