@@ -19,3 +19,9 @@ Class-16: https://youtu.be/vOgQdDvJX78
 Class-17: https://youtu.be/GVRUG3wUrIQ
 Class-18: https://youtu.be/dvzGByg2-No
 Class-19: https://youtu.be/Ll4D_fF0uFQ
+Class-20: 
+Class-21:
+Class-22:
+
+Django First Class: https://youtu.be/iXR6cbRsNfw
+For 25 days: Learn: 10 days, Project: 5 days. Submit: 10 days.

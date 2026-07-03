@@ -3,12 +3,12 @@ For the First Time Computer: Create new virtual Environment
 2. python -m venv virtual
 3. virtual\Scripts\activate
 4. pip install Django
-5. python manage.py startproject ProjectName OR
-   python -m django startproject student
-6. cd student
+5. django-admin startproject CaloryProject OR
+   python -m django startproject CaloryProject
+6. cd CaloryProject
 7. python manage.py runserver
 8. Ctrl + c
-9. python manage.py startapp StudentApp
+9. python manage.py startapp CaloryApp
 
 
 For Creating new App

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calory Tracker - Edit Meal</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero {
+            background-color: #f8f9fa;
+            padding: 80px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation Menu -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">CaloryTracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Meals</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Calculator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Calory Entry Form Section -->
+    <section class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Edit Meal</h5>
+                        <a href="/" class="btn btn-light btn-sm text-success fw-bold">Cancel</a>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="foodName" class="form-label fw-semibold">Food Name</label>
+                                <input type="text" class="form-control" id="foodName" name="food_name"
+                                    value="{{ meal.food_name }}" placeholder="e.g. Apple, Rice, Grilled Chicken">
+                            </div>
+                            <div class="mb-3">
+                                <label for="calories" class="form-label fw-semibold">Calories</label>
+                                <input type="number" class="form-control" id="calories" name="calories"
+                                    value="{{ meal.calories }}" placeholder="e.g. 150">
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 fw-bold">Update Meal</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container">
+            <h1 class="display-4 fw-bold text-success">Track Your Calories Easily</h1>
+            <p class="lead text-muted mt-3 mb-4">Enter your age, weight, height, and gender to calculate your daily
+                calorie needs and keep track of your meals.</p>
+            <a href="#" class="btn btn-success btn-lg px-4 me-2">Get Started</a>
+            <a href="#" class="btn btn-outline-secondary btn-lg px-4">Learn More</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">Track Meals</h3>
+                        <p class="card-text text-muted">Log your daily meals and instantly see how many calories you've
+                            consumed.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">Set Goals</h3>
+                        <p class="card-text text-muted">Determine your ideal caloric intake for weight loss,
+                            maintenance, or muscle gain.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h3 class="h5 card-title">View Progress</h3>
+                        <p class="card-text text-muted">Analyze your eating habits over time with simple, easy-to-read
+                            charts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-auto">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 CaloryTracker. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
