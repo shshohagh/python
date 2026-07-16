@@ -15,6 +15,11 @@ def index(request):
     meals = Meal.objects.all().order_by('-created_at')
     return render(request, 'index.html', {'meals': meals})
 
+def calory(request):
+    # Fetch Data from Database
+    meals = Meal.objects.all().order_by('-created_at')
+    return render(request, 'calory.html', {'meals': meals})
+
 def edit(request, meal_id):
     # Fetch Data from Database
     meal = Meal.objects.get(id=meal_id)
