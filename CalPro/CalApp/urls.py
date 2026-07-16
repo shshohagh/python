@@ -21,4 +21,5 @@ urlpatterns = [
     path('water/update/', views.update_water, name='update_water'),
     path('weight/log/', views.log_weight, name='log_weight'),
     path('export/', views.export_data, name='export_data'),
+    path('analytics/', views.analytics_view, name='analytics'),
 ]

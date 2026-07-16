@@ -357,3 +357,39 @@ def export_data(request):
         writer.writerow([entry.date, category_name, entry.item_name, entry.calories])
 
     return response
+
+@login_required
+def analytics_view(request):
+    profile = Profile.objects.filter(user=request.user).first()
+    if not profile:
+        messages.info(request, 'Please complete your profile first.')
+        return redirect('profile_setup')
+
+    today = timezone.localdate()
+    dates = []
+    calories = []
+    bmrs = []
+    proteins = []
+    carbs = []
+    fats = []
+
+    for i in range(6, -1, -1):
+        target_date = today - timedelta(days=i)
+        dates.append(target_date.strftime('%b %d'))
+        stats = get_daily_stats(request.user, target_date)
+        calories.append(stats['consumed'])
+        bmrs.append(stats['required'])
+        proteins.append(stats['macros']['protein']['consumed'])
+        carbs.append(stats['macros']['carbs']['consumed'])
+        fats.append(stats['macros']['fats']['consumed'])
+
+    context = {
+        'dates': dates,
+        'calories': calories,
+        'bmrs': bmrs,
+        'proteins': proteins,
+        'carbs': carbs,
+        'fats': fats,
+    }
+
+    return render(request, 'CalApp/analytics.html', context)

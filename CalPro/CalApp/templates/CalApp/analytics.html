@@ -1,0 +1,158 @@
+{% extends 'CalApp/base.html' %}
+{% load static %}
+{% block title %}Analytics | Calorie Counter{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-extrabold mb-0"><span class="text-primary-gradient">Analytics</span></h2>
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary fw-semibold"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm glass-card-float" style="animation: none;">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4 text-muted"><i class="bi bi-graph-up-arrow text-primary"></i> Last 7 Days Calorie Trend</h5>
+                <canvas id="calorieChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm glass-card-float" style="animation: none; height: 100%;">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4 text-muted"><i class="bi bi-pie-chart text-success"></i> Macro Distribution (Last 7 Days)</h5>
+                <canvas id="macroChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm glass-card-float" style="animation: none; height: 100%;">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4 text-muted"><i class="bi bi-lightning text-warning"></i> Quick Insights</h5>
+                <ul class="list-group list-group-flush mt-3">
+                    <li class="list-group-item bg-transparent border-white-50 px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-semibold">Average Calories</span>
+                        <span class="fw-bold text-primary" id="avgCalories"></span>
+                    </li>
+                    <li class="list-group-item bg-transparent border-white-50 px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-semibold">Average Protein</span>
+                        <span class="fw-bold text-info" id="avgProtein"></span>
+                    </li>
+                    <li class="list-group-item bg-transparent border-white-50 px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-semibold">Average Carbs</span>
+                        <span class="fw-bold text-warning" id="avgCarbs"></span>
+                    </li>
+                    <li class="list-group-item bg-transparent border-white-50 px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-semibold">Average Fats</span>
+                        <span class="fw-bold text-danger" id="avgFats"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+{{ dates|json_script:"datesData" }}
+{{ calories|json_script:"caloriesData" }}
+{{ bmrs|json_script:"bmrsData" }}
+{{ proteins|json_script:"proteinsData" }}
+{{ carbs|json_script:"carbsData" }}
+{{ fats|json_script:"fatsData" }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dates = JSON.parse(document.getElementById('datesData').textContent);
+        const calories = JSON.parse(document.getElementById('caloriesData').textContent);
+        const bmrs = JSON.parse(document.getElementById('bmrsData').textContent);
+        const proteins = JSON.parse(document.getElementById('proteinsData').textContent);
+        const carbs = JSON.parse(document.getElementById('carbsData').textContent);
+        const fats = JSON.parse(document.getElementById('fatsData').textContent);
+
+        // Calorie Trend Chart
+        const ctxCal = document.getElementById('calorieChart').getContext('2d');
+        new Chart(ctxCal, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Consumed (kcal)',
+                        data: calories,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#6366f1'
+                    },
+                    {
+                        label: 'Target (BMR)',
+                        data: bmrs,
+                        borderColor: '#f59e0b',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        tension: 0,
+                        fill: false,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Macro Chart (Total sum over 7 days)
+        const totalProtein = proteins.reduce((a, b) => a + b, 0);
+        const totalCarbs = carbs.reduce((a, b) => a + b, 0);
+        const totalFats = fats.reduce((a, b) => a + b, 0);
+
+        const ctxMacro = document.getElementById('macroChart').getContext('2d');
+        new Chart(ctxMacro, {
+            type: 'doughnut',
+            data: {
+                labels: ['Protein (g)', 'Carbs (g)', 'Fats (g)'],
+                datasets: [{
+                    data: [totalProtein, totalCarbs, totalFats],
+                    backgroundColor: ['#0dcaf0', '#ffc107', '#dc3545'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Insights Calculation
+        const avgCal = Math.round(calories.reduce((a, b) => a + b, 0) / 7);
+        const avgPro = Math.round(totalProtein / 7);
+        const avgCar = Math.round(totalCarbs / 7);
+        const avgFat = Math.round(totalFats / 7);
+
+        document.getElementById('avgCalories').textContent = avgCal + ' kcal';
+        document.getElementById('avgProtein').textContent = avgPro + ' g';
+        document.getElementById('avgCarbs').textContent = avgCar + ' g';
+        document.getElementById('avgFats').textContent = avgFat + ' g';
+    });
+</script>
+{% endblock %}

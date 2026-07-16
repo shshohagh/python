@@ -208,6 +208,14 @@
                 <div class="modal-body">
                     <div id="formAlert" class="alert alert-danger py-2 d-none"></div>
                     <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">Search Food (OpenFoodFacts)</label>
+                        <div class="input-group">
+                            <input type="text" id="foodSearchInput" class="form-control" placeholder="e.g. Apple">
+                            <button class="btn btn-outline-secondary" type="button" id="foodSearchBtn">Search</button>
+                        </div>
+                        <div id="foodSearchResults" class="list-group mt-1 shadow-sm" style="position: absolute; z-index: 1000; width: 95%; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label text-muted small fw-semibold">Category</label>
                         {{ entry_form.category }}
                     </div>
@@ -310,4 +318,61 @@
     window.TARGET_DATE = "{{ target_date|date:'Y-m-d' }}";
 </script>
 <script src="{% static 'CalApp/js/dashboard.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('foodSearchInput');
+        const searchBtn = document.getElementById('foodSearchBtn');
+        const resultsContainer = document.getElementById('foodSearchResults');
+
+        searchBtn.addEventListener('click', function() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            searchBtn.textContent = '...';
+            searchBtn.disabled = true;
+
+            fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=5`)
+                .then(res => res.json())
+                .then(data => {
+                    resultsContainer.innerHTML = '';
+                    if (data.products && data.products.length > 0) {
+                        data.products.forEach(product => {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'list-group-item list-group-item-action';
+                            btn.textContent = product.product_name || 'Unknown Item';
+                            
+                            btn.addEventListener('click', () => {
+                                document.getElementById('id_item_name').value = product.product_name || '';
+                                document.getElementById('id_calories').value = Math.round(product.nutriments['energy-kcal_100g'] || 0);
+                                document.getElementById('id_protein').value = Math.round(product.nutriments.proteins_100g || 0);
+                                document.getElementById('id_carbs').value = Math.round(product.nutriments.carbohydrates_100g || 0);
+                                document.getElementById('id_fats').value = Math.round(product.nutriments.fat_100g || 0);
+                                resultsContainer.innerHTML = '';
+                                searchInput.value = '';
+                            });
+                            resultsContainer.appendChild(btn);
+                        });
+                    } else {
+                        resultsContainer.innerHTML = '<div class="list-group-item text-muted">No results found</div>';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching data:', err);
+                    resultsContainer.innerHTML = '<div class="list-group-item text-danger">Error fetching data</div>';
+                })
+                .finally(() => {
+                    searchBtn.textContent = 'Search';
+                    searchBtn.disabled = false;
+                });
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchBtn.contains(e.target) && !resultsContainer.contains(e.target)) {
+                resultsContainer.innerHTML = '';
+            }
+        });
+    });
+</script>
 {% endblock %}
