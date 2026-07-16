@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (row) row.remove();
                     toggleEmptyState();
                     updateTotals(data);
+                    if (window.showToast) window.showToast('Item removed successfully.', 'success');
                 });
         });
     }
@@ -85,8 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (form) {
         form.addEventListener('submit', function (event) {
             event.preventDefault();
-            formAlert.classList.add('d-none');
-            formAlert.textContent = '';
+            if (formAlert) formAlert.classList.add('d-none');
 
             fetch(window.CALORIE_URLS.add, {
                 method: 'POST',
@@ -103,8 +103,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         var messages = Object.keys(errors).map(function (key) {
                             return errors[key].join(' ');
                         });
-                        formAlert.textContent = messages.join(' ') || 'Please check the form and try again.';
-                        formAlert.classList.remove('d-none');
+                        var msg = messages.join(' ') || 'Please check the form and try again.';
+                        if (window.showToast) {
+                            window.showToast(msg, 'error');
+                        } else if (formAlert) {
+                            formAlert.textContent = msg;
+                            formAlert.classList.remove('d-none');
+                        }
                         return;
                     }
 
@@ -126,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     form.reset();
                     if (modal) modal.hide();
+                    if (window.showToast) window.showToast('Item added successfully.', 'success');
                 });
         });
     }
@@ -133,8 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (editForm) {
         editForm.addEventListener('submit', function (event) {
             event.preventDefault();
-            editFormAlert.classList.add('d-none');
-            editFormAlert.textContent = '';
+            if (editFormAlert) editFormAlert.classList.add('d-none');
 
             var id = document.getElementById('editEntryId').value;
 
@@ -153,8 +158,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         var messages = Object.keys(errors).map(function (key) {
                             return errors[key].join(' ');
                         });
-                        editFormAlert.textContent = messages.join(' ') || 'Please check the form and try again.';
-                        editFormAlert.classList.remove('d-none');
+                        var msg = messages.join(' ') || 'Please check the form and try again.';
+                        if (window.showToast) {
+                            window.showToast(msg, 'error');
+                        } else if (editFormAlert) {
+                            editFormAlert.textContent = msg;
+                            editFormAlert.classList.remove('d-none');
+                        }
                         return;
                     }
 
@@ -172,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     
                     updateTotals(result.data);
                     if (editModal) editModal.hide();
+                    if (window.showToast) window.showToast('Item updated successfully.', 'success');
                 });
         });
     }
