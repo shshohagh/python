@@ -36,6 +36,18 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             bar.classList.add('bg-danger');
         }
+
+        if (data.macros) {
+            function updateMacroBar(macro, idPrefix) {
+                var label = document.getElementById(idPrefix + 'Label');
+                var bar = document.getElementById(idPrefix + 'Bar');
+                if (label) label.textContent = data.macros[macro].consumed + ' / ' + data.macros[macro].target + 'g (' + data.macros[macro].percent + '%)';
+                if (bar) bar.style.width = data.macros[macro].percent + '%';
+            }
+            updateMacroBar('protein', 'protein');
+            updateMacroBar('carbs', 'carbs');
+            updateMacroBar('fats', 'fats');
+        }
     }
 
     function toggleEmptyState() {
@@ -71,12 +83,22 @@ document.addEventListener('DOMContentLoaded', function () {
             var catId = button.getAttribute('data-category');
             var name = button.getAttribute('data-name');
             var calories = button.getAttribute('data-calories');
+            var protein = button.getAttribute('data-protein') || '0';
+            var carbs = button.getAttribute('data-carbs') || '0';
+            var fats = button.getAttribute('data-fats') || '0';
 
             document.getElementById('editEntryId').value = id;
             var catSelect = document.getElementById('editCategory');
             if (catSelect) catSelect.value = catId;
             document.getElementById('editItemName').value = name;
             document.getElementById('editCalories').value = calories;
+            
+            var proteinInput = document.getElementById('editProtein');
+            if (proteinInput) proteinInput.value = protein;
+            var carbsInput = document.getElementById('editCarbs');
+            if (carbsInput) carbsInput.value = carbs;
+            var fatsInput = document.getElementById('editFats');
+            if (fatsInput) fatsInput.value = fats;
 
             if (editFormAlert) editFormAlert.classList.add('d-none');
             if (editModal) editModal.show();
@@ -139,9 +161,16 @@ document.addEventListener('DOMContentLoaded', function () {
                             '<div class="small text-muted text-truncate item-name">' + entry.item_name + '</div>' +
                         '</div>' +
                         '<div class="ms-auto d-flex align-items-center gap-3">' +
+                            '<div class="text-end d-none d-sm-block">' +
+                                '<div class="small fw-bold text-muted item-macros">' +
+                                    '<span class="text-info">' + entry.protein + 'g</span> P &middot; ' +
+                                    '<span class="text-warning">' + entry.carbs + 'g</span> C &middot; ' +
+                                    '<span class="text-danger">' + entry.fats + 'g</span> F' +
+                                '</div>' +
+                            '</div>' +
                             '<div class="fw-bold fs-5 text-nowrap item-calories">' + entry.calories + ' kcal</div>' +
                             '<div class="text-nowrap flex-shrink-0">' +
-                                '<button class="btn btn-sm btn-outline-primary edit-entry-btn rounded-circle" style="width: 32px; height: 32px; padding: 0;" data-id="' + entry.id + '" data-category="' + catId + '" data-name="' + entry.item_name + '" data-calories="' + entry.calories + '">' +
+                                '<button class="btn btn-sm btn-outline-primary edit-entry-btn rounded-circle" style="width: 32px; height: 32px; padding: 0;" data-id="' + entry.id + '" data-category="' + catId + '" data-name="' + entry.item_name + '" data-calories="' + entry.calories + '" data-protein="' + entry.protein + '" data-carbs="' + entry.carbs + '" data-fats="' + entry.fats + '">' +
                                     '<i class="bi bi-pencil"></i>' +
                                 '</button>' +
                                 '<button class="btn btn-sm btn-outline-danger delete-entry-btn rounded-circle ms-1" style="width: 32px; height: 32px; padding: 0;" data-id="' + entry.id + '">' +
@@ -213,11 +242,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         row.querySelector('.item-name').textContent = entry.item_name;
                         row.querySelector('.item-calories').textContent = entry.calories + ' kcal';
+                        
+                        var macrosEl = row.querySelector('.item-macros');
+                        if (macrosEl) {
+                            macrosEl.innerHTML = '<span class="text-info">' + entry.protein + 'g</span> P &middot; ' +
+                                                 '<span class="text-warning">' + entry.carbs + 'g</span> C &middot; ' +
+                                                 '<span class="text-danger">' + entry.fats + 'g</span> F';
+                        }
+                        
                         var editBtn = row.querySelector('.edit-entry-btn');
                         if (editBtn) {
                             editBtn.setAttribute('data-category', catId);
                             editBtn.setAttribute('data-name', entry.item_name);
                             editBtn.setAttribute('data-calories', entry.calories);
+                            editBtn.setAttribute('data-protein', entry.protein);
+                            editBtn.setAttribute('data-carbs', entry.carbs);
+                            editBtn.setAttribute('data-fats', entry.fats);
                         }
                     }
                     
@@ -253,6 +293,38 @@ document.addEventListener('DOMContentLoaded', function () {
                         waterGlasses.textContent = data.glasses;
                     }
                 });
+            });
+        });
+    }
+
+    var saveWeightBtn = document.getElementById('saveWeightBtn');
+    if (saveWeightBtn) {
+        saveWeightBtn.addEventListener('click', function() {
+            var weight = document.getElementById('weightInput').value;
+            if (!weight) return;
+            var formData = new FormData();
+            formData.append('weight_kg', weight);
+            fetch(window.CALORIE_URLS.logWeight, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(document.body),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    var display = document.getElementById('currentWeightDisplay');
+                    if (display) display.textContent = data.weight_kg;
+                    document.getElementById('weightInput').value = '';
+                    if (window.showToast) window.showToast('Weight updated successfully.', 'success');
+                } else {
+                    if (window.showToast) window.showToast(data.error || 'Failed to update weight.', 'error');
+                }
+            })
+            .catch(err => {
+                if (window.showToast) window.showToast('An error occurred.', 'error');
             });
         });
     }

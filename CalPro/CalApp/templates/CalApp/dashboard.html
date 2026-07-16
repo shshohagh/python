@@ -25,7 +25,7 @@
 </div>
 
 <div class="row g-4 mb-4">
-    <div class="col-lg-3 col-md-6">
+    <div class="col-md-4">
         <div class="card stat-card h-100 border-0 shadow-sm glass-card-float" style="animation: none;">
             <div class="card-body">
                 <div class="text-muted small text-uppercase fw-semibold"><i
@@ -35,7 +35,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6">
+    <div class="col-md-4">
         <div class="card stat-card h-100 border-0 shadow-sm glass-card-float" style="animation: none;">
             <div class="card-body">
                 <div class="text-muted small text-uppercase fw-semibold"><i class="bi bi-fire text-warning me-1"></i>
@@ -45,7 +45,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6">
+    <div class="col-md-4">
         <div class="card stat-card h-100 border-0 shadow-sm glass-card-float" style="animation: none;">
             <div class="card-body">
                 <div class="text-muted small text-uppercase fw-semibold"><i
@@ -55,7 +55,10 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6">
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
         <div class="card stat-card h-100 border-0 shadow-sm glass-card-float" style="animation: none;">
             <div class="card-body d-flex flex-column justify-content-between">
                 <div class="text-muted small text-uppercase fw-semibold"><i class="bi bi-droplet-half text-info me-1"></i> Water Intake</div>
@@ -66,6 +69,28 @@
                         <span class="text-muted small ms-1">glasses</span>
                     </div>
                     <button class="btn btn-sm btn-info text-white rounded-circle fw-bold water-btn" data-action="add" style="width: 32px; height: 32px;">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card stat-card h-100 border-0 shadow-sm glass-card-float" style="animation: none;">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small text-uppercase fw-semibold"><i class="bi bi-speedometer text-secondary me-1"></i> Body Weight</div>
+                    {% if profile.target_weight_kg %}
+                    <span class="badge bg-secondary">Target: {{ profile.target_weight_kg }} kg</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex align-items-center mt-2 justify-content-between">
+                    <div>
+                        <span class="display-6 fw-bold text-secondary" id="currentWeightDisplay">{{ current_weight|default:"--" }}</span>
+                        <span class="text-muted small ms-1">kg</span>
+                    </div>
+                    <div class="input-group" style="width: 150px;">
+                        <input type="number" class="form-control form-control-sm" id="weightInput" step="0.1" placeholder="Update">
+                        <button class="btn btn-sm btn-secondary" id="saveWeightBtn">Save</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -84,6 +109,37 @@
                 id="progressBar" style="width: {{ percent }}%;"></div>
         </div>
         <p class="mt-3 mb-0 text-muted small" id="guidelineText">{{ guideline }}</p>
+        
+        <hr class="text-muted opacity-25">
+        <div class="row mt-3">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="d-flex justify-content-between small fw-bold mb-1">
+                    <span>Protein</span>
+                    <span id="proteinLabel">{{ macros.protein.consumed }} / {{ macros.protein.target }}g ({{ macros.protein.percent }}%)</span>
+                </div>
+                <div class="progress" style="height: 0.5rem;" role="progressbar">
+                    <div class="progress-bar bg-info" id="proteinBar" style="width: {{ macros.protein.percent }}%;"></div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="d-flex justify-content-between small fw-bold mb-1">
+                    <span>Carbs</span>
+                    <span id="carbsLabel">{{ macros.carbs.consumed }} / {{ macros.carbs.target }}g ({{ macros.carbs.percent }}%)</span>
+                </div>
+                <div class="progress" style="height: 0.5rem;" role="progressbar">
+                    <div class="progress-bar bg-warning" id="carbsBar" style="width: {{ macros.carbs.percent }}%;"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex justify-content-between small fw-bold mb-1">
+                    <span>Fats</span>
+                    <span id="fatsLabel">{{ macros.fats.consumed }} / {{ macros.fats.target }}g ({{ macros.fats.percent }}%)</span>
+                </div>
+                <div class="progress" style="height: 0.5rem;" role="progressbar">
+                    <div class="progress-bar bg-danger" id="fatsBar" style="width: {{ macros.fats.percent }}%;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -108,12 +164,20 @@
                     <div class="small text-muted text-truncate item-name">{{ entry.item_name }}</div>
                 </div>
                 <div class="ms-auto d-flex align-items-center gap-3">
+                    <div class="text-end d-none d-sm-block">
+                        <div class="small fw-bold text-muted item-macros">
+                            <span class="text-info">{{ entry.protein }}g</span> P &middot; 
+                            <span class="text-warning">{{ entry.carbs }}g</span> C &middot; 
+                            <span class="text-danger">{{ entry.fats }}g</span> F
+                        </div>
+                    </div>
                     <div class="fw-bold fs-5 text-nowrap item-calories">{{ entry.calories }} kcal</div>
                     <div class="text-nowrap flex-shrink-0">
                         <button class="btn btn-sm btn-outline-primary edit-entry-btn rounded-circle"
                             style="width: 32px; height: 32px; padding: 0;" data-id="{{ entry.id }}"
                             data-category="{{ entry.category.id|default:'' }}"
-                            data-name="{{ entry.item_name }}" data-calories="{{ entry.calories }}">
+                            data-name="{{ entry.item_name }}" data-calories="{{ entry.calories }}"
+                            data-protein="{{ entry.protein }}" data-carbs="{{ entry.carbs }}" data-fats="{{ entry.fats }}">
                             <i class="bi bi-pencil"></i>
                         </button>
                         <button class="btn btn-sm btn-outline-danger delete-entry-btn rounded-circle ms-1"
@@ -152,8 +216,22 @@
                         {{ entry_form.item_name }}
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" for="{{ entry_form.calories.id_for_label }}">Calories Consumed</label>
+                        <label class="form-label" for="{{ entry_form.calories.id_for_label }}">Calories</label>
                         {{ entry_form.calories }}
+                    </div>
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <label class="form-label small text-muted fw-bold">Protein (g)</label>
+                            {{ entry_form.protein }}
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label small text-muted fw-bold">Carbs (g)</label>
+                            {{ entry_form.carbs }}
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label small text-muted fw-bold">Fats (g)</label>
+                            {{ entry_form.fats }}
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -192,8 +270,22 @@
                         <input type="text" name="item_name" class="form-control" id="editItemName" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-semibold" for="editCalories">Calories Consumed</label>
+                        <label class="form-label text-muted small fw-semibold" for="editCalories">Calories</label>
                         <input type="number" name="calories" class="form-control" id="editCalories" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <label class="form-label text-muted small fw-semibold" for="editProtein">Protein (g)</label>
+                            <input type="number" name="protein" class="form-control" id="editProtein" value="0" required>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label text-muted small fw-semibold" for="editCarbs">Carbs (g)</label>
+                            <input type="number" name="carbs" class="form-control" id="editCarbs" value="0" required>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label text-muted small fw-semibold" for="editFats">Fats (g)</label>
+                            <input type="number" name="fats" class="form-control" id="editFats" value="0" required>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -213,6 +305,7 @@
         editBase: "{% url 'edit_calorie_entry' 0 %}".replace('0/', ''),
         deleteBase: "{% url 'delete_calorie_entry' 0 %}".replace('0/', ''),
         updateWater: "{% url 'update_water' %}",
+        logWeight: "{% url 'log_weight' %}",
     };
     window.TARGET_DATE = "{{ target_date|date:'Y-m-d' }}";
 </script>

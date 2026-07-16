@@ -76,6 +76,49 @@ def profile_view(request):
     return render(request, 'CalApp/profile_form.html', {'form': form, 'profile': profile})
 
 
+def get_daily_stats(user, target_date):
+    profile = get_object_or_404(Profile, user=user)
+    entries = CalorieEntry.objects.filter(user=user, date=target_date)
+    
+    consumed = sum(entry.calories for entry in entries)
+    required = profile.bmr()
+    percent = min(round((consumed / required) * 100), 100) if required else 0
+    
+    if required == 0:
+        guideline = ''
+    elif consumed < required * 0.9:
+        guideline = "You're under your target today — good if you're aiming to lose weight, but eat a bit more if you want to maintain."
+    elif consumed > required * 1.1:
+        guideline = "You're over your target today — cut back if you're not intentionally trying to gain weight."
+    else:
+        guideline = "You're right on track with your daily target!"
+
+    consumed_protein = sum(entry.protein for entry in entries)
+    consumed_carbs = sum(entry.carbs for entry in entries)
+    consumed_fats = sum(entry.fats for entry in entries)
+
+    target_protein = round((required * 0.30) / 4) if required else 0
+    target_carbs = round((required * 0.40) / 4) if required else 0
+    target_fats = round((required * 0.30) / 9) if required else 0
+
+    percent_protein = min(round((consumed_protein / target_protein) * 100), 100) if target_protein else 0
+    percent_carbs = min(round((consumed_carbs / target_carbs) * 100), 100) if target_carbs else 0
+    percent_fats = min(round((consumed_fats / target_fats) * 100), 100) if target_fats else 0
+
+    return {
+        'consumed': consumed,
+        'required': required,
+        'remaining': required - consumed,
+        'percent': percent,
+        'guideline': guideline,
+        'macros': {
+            'protein': {'consumed': consumed_protein, 'target': target_protein, 'percent': percent_protein},
+            'carbs': {'consumed': consumed_carbs, 'target': target_carbs, 'percent': percent_carbs},
+            'fats': {'consumed': consumed_fats, 'target': target_fats, 'percent': percent_fats},
+        }
+    }
+
+
 @login_required
 def dashboard_view(request):
     profile = Profile.objects.filter(user=request.user).first()
@@ -96,36 +139,28 @@ def dashboard_view(request):
     next_date = target_date + timedelta(days=1)
 
     entries = CalorieEntry.objects.filter(user=request.user, date=target_date)
-    consumed = sum(entry.calories for entry in entries)
-    required = profile.bmr()
-    percent = min(round((consumed / required) * 100), 100) if required else 0
-
-    if required == 0:
-        guideline = ''
-    elif consumed < required * 0.9:
-        guideline = "You're under your target today — good if you're aiming to lose weight, but eat a bit more if you want to maintain."
-    elif consumed > required * 1.1:
-        guideline = "You're over your target today — cut back if you're not intentionally trying to gain weight."
-    else:
-        guideline = "You're right on track with your daily target!"
-
+    stats = get_daily_stats(request.user, target_date)
+    
     water_log, _ = WaterLog.objects.get_or_create(user=request.user, date=target_date)
+    from .models import WeightLog
+    weight_log = WeightLog.objects.filter(user=request.user).order_by('-date').first()
+    current_weight = weight_log.weight_kg if weight_log else profile.weight_kg
+
     entry_form = CalorieEntryForm(user=request.user)
 
-    return render(request, 'CalApp/dashboard.html', {
+    context = {
         'profile': profile,
         'entries': entries,
-        'consumed': consumed,
-        'required': required,
-        'remaining': required - consumed,
-        'percent': percent,
-        'guideline': guideline,
         'entry_form': entry_form,
         'target_date': target_date,
         'prev_date': prev_date,
         'next_date': next_date,
         'water_glasses': water_log.glasses,
-    })
+        'current_weight': current_weight,
+    }
+    context.update(stats)
+
+    return render(request, 'CalApp/dashboard.html', context)
 
 
 @login_required
@@ -151,19 +186,7 @@ def add_calorie_entry(request):
     entry.date = target_date
     entry.save()
 
-    profile = get_object_or_404(Profile, user=request.user)
-    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=target_date))
-    required = profile.bmr()
-
-    percent = min(round((consumed / required) * 100), 100) if required else 0
-    if required == 0:
-        guideline = ''
-    elif consumed < required * 0.9:
-        guideline = "You're under your target today — good if you're aiming to lose weight, but eat a bit more if you want to maintain."
-    elif consumed > required * 1.1:
-        guideline = "You're over your target today — cut back if you're not intentionally trying to gain weight."
-    else:
-        guideline = "You're right on track with your daily target!"
+    stats = get_daily_stats(request.user, target_date)
 
     category_data = {
         'id': entry.category.id if entry.category else None,
@@ -172,19 +195,19 @@ def add_calorie_entry(request):
         'icon': entry.category.icon if entry.category else '<i class="bi bi-tag fs-4"></i>',
     }
 
-    return JsonResponse({
+    response_data = {
         'entry': {
             'id': entry.id,
             'item_name': entry.item_name,
             'calories': entry.calories,
+            'protein': entry.protein,
+            'carbs': entry.carbs,
+            'fats': entry.fats,
             'category': category_data,
         },
-        'consumed': consumed,
-        'required': required,
-        'remaining': required - consumed,
-        'percent': percent,
-        'guideline': guideline,
-    })
+    }
+    response_data.update(stats)
+    return JsonResponse(response_data)
 
 
 @login_required
@@ -196,27 +219,8 @@ def delete_calorie_entry(request, entry_id):
     target_date = entry.date
     entry.delete()
 
-    profile = get_object_or_404(Profile, user=request.user)
-    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=target_date))
-    required = profile.bmr()
-
-    percent = min(round((consumed / required) * 100), 100) if required else 0
-    if required == 0:
-        guideline = ''
-    elif consumed < required * 0.9:
-        guideline = "You're under your target today — good if you're aiming to lose weight, but eat a bit more if you want to maintain."
-    elif consumed > required * 1.1:
-        guideline = "You're over your target today — cut back if you're not intentionally trying to gain weight."
-    else:
-        guideline = "You're right on track with your daily target!"
-
-    return JsonResponse({
-        'consumed': consumed,
-        'required': required,
-        'remaining': required - consumed,
-        'percent': percent,
-        'guideline': guideline,
-    })
+    stats = get_daily_stats(request.user, target_date)
+    return JsonResponse(stats)
 
 
 @login_required
@@ -232,19 +236,7 @@ def edit_calorie_entry(request, entry_id):
     entry = form.save()
     target_date = entry.date
 
-    profile = get_object_or_404(Profile, user=request.user)
-    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=target_date))
-    required = profile.bmr()
-
-    percent = min(round((consumed / required) * 100), 100) if required else 0
-    if required == 0:
-        guideline = ''
-    elif consumed < required * 0.9:
-        guideline = "You're under your target today — good if you're aiming to lose weight, but eat a bit more if you want to maintain."
-    elif consumed > required * 1.1:
-        guideline = "You're over your target today — cut back if you're not intentionally trying to gain weight."
-    else:
-        guideline = "You're right on track with your daily target!"
+    stats = get_daily_stats(request.user, target_date)
 
     category_data = {
         'id': entry.category.id if entry.category else None,
@@ -253,19 +245,40 @@ def edit_calorie_entry(request, entry_id):
         'icon': entry.category.icon if entry.category else '<i class="bi bi-tag fs-4"></i>',
     }
 
-    return JsonResponse({
+    response_data = {
         'entry': {
             'id': entry.id,
             'item_name': entry.item_name,
             'calories': entry.calories,
+            'protein': entry.protein,
+            'carbs': entry.carbs,
+            'fats': entry.fats,
             'category': category_data,
         },
-        'consumed': consumed,
-        'required': required,
-        'remaining': required - consumed,
-        'percent': percent,
-        'guideline': guideline,
-    })
+    }
+    response_data.update(stats)
+    return JsonResponse(response_data)
+
+
+@login_required
+def log_weight(request):
+    if request.method == 'POST':
+        from .models import WeightLog
+        weight_kg = request.POST.get('weight_kg')
+        try:
+            weight_kg = float(weight_kg)
+            target_date = timezone.localdate()
+            weight_log, _ = WeightLog.objects.get_or_create(user=request.user, date=target_date)
+            weight_log.weight_kg = weight_kg
+            weight_log.save()
+            
+            profile = request.user.profile
+            profile.weight_kg = weight_kg
+            profile.save()
+            return JsonResponse({'success': True, 'weight_kg': weight_kg})
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Invalid weight'}, status=400)
+    return JsonResponse({'error': 'Invalid method'}, status=405)
 
 
 
