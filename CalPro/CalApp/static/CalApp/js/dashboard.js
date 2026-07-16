@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('consumedValue').textContent = data.consumed;
         document.getElementById('remainingValue').textContent = data.remaining;
         document.getElementById('percentLabel').textContent = data.percent + '%';
+        
+        var guidelineText = document.getElementById('guidelineText');
+        if (guidelineText && data.guideline !== undefined) {
+            guidelineText.textContent = data.guideline;
+        }
 
         var bar = document.getElementById('progressBar');
         bar.style.width = data.percent + '%';

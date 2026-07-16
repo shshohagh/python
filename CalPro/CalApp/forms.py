@@ -42,6 +42,13 @@ class LoginForm(forms.Form):
 
 
 class ProfileForm(forms.ModelForm):
+    height_ft = forms.CharField(
+        label='Height (ft.in)',
+        required=False,
+        help_text='e.g. 5.5 for 5 feet 5 inches',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'height_ft_input', 'placeholder': '5.5'})
+    )
+
     class Meta:
         model = Profile
         fields = ['name', 'age', 'gender', 'height_cm', 'weight_kg']
@@ -49,13 +56,15 @@ class ProfileForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'age': forms.NumberInput(attrs={'class': 'form-control'}),
             'gender': forms.Select(attrs={'class': 'form-select'}),
-            'height_cm': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+            'height_cm': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'id': 'height_cm_input'}),
             'weight_kg': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
         }
         labels = {
             'height_cm': 'Height (cm)',
             'weight_kg': 'Weight (kg)',
         }
+    
+    field_order = ['name', 'age', 'gender', 'height_ft', 'height_cm', 'weight_kg']
 
 
 class CalorieEntryForm(forms.ModelForm):

@@ -43,6 +43,9 @@ def login_view(request):
             )
             if user is not None:
                 login(request, user)
+                next_url = request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
                 return redirect('dashboard')
             form.add_error(None, 'Invalid username/email or password.')
     else:
@@ -125,6 +128,16 @@ def add_calorie_entry(request):
     consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=today))
     required = profile.bmr()
 
+    percent = min(round((consumed / required) * 100), 100) if required else 0
+    if required == 0:
+        guideline = ''
+    elif consumed < required * 0.9:
+        guideline = "You're under your target today — good if you're aiming to lose weight, but eat a bit more if you want to maintain."
+    elif consumed > required * 1.1:
+        guideline = "You're over your target today — cut back if you're not intentionally trying to gain weight."
+    else:
+        guideline = "You're right on track with your daily target!"
+
     return JsonResponse({
         'entry': {
             'id': entry.id,
@@ -134,7 +147,8 @@ def add_calorie_entry(request):
         'consumed': consumed,
         'required': required,
         'remaining': required - consumed,
-        'percent': min(round((consumed / required) * 100), 100) if required else 0,
+        'percent': percent,
+        'guideline': guideline,
     })
 
 
@@ -151,11 +165,22 @@ def delete_calorie_entry(request, entry_id):
     consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=today))
     required = profile.bmr()
 
+    percent = min(round((consumed / required) * 100), 100) if required else 0
+    if required == 0:
+        guideline = ''
+    elif consumed < required * 0.9:
+        guideline = "You're under your target today — good if you're aiming to lose weight, but eat a bit more if you want to maintain."
+    elif consumed > required * 1.1:
+        guideline = "You're over your target today — cut back if you're not intentionally trying to gain weight."
+    else:
+        guideline = "You're right on track with your daily target!"
+
     return JsonResponse({
         'consumed': consumed,
         'required': required,
         'remaining': required - consumed,
-        'percent': min(round((consumed / required) * 100), 100) if required else 0,
+        'percent': percent,
+        'guideline': guideline,
     })
 
 
