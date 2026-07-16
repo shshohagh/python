@@ -1,0 +1,41 @@
+{% extends 'CalApp/base.html' %}
+{% block title %}Welcome | Calorie Counter{% endblock %}
+{% block content %}
+<div class="hero rounded-4 p-5 p-md-5 mb-4 text-center">
+    <i class="bi bi-fire display-1"></i>
+    <h1 class="display-5 fw-bold mt-3">Know Your Numbers. Own Your Goals.</h1>
+    <p class="lead col-lg-8 mx-auto">
+        Estimate exactly how many calories your body needs each day using the scientifically
+        backed BMR formula, then track what you eat and see instantly whether you're on
+        course to lose, maintain, or gain weight.
+    </p>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <a href="{% url 'register' %}" class="btn btn-warning btn-lg px-4"><i class="bi bi-rocket-takeoff"></i> Get Started</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4">I already have an account</a>
+    </div>
+</div>
+
+<div class="row g-4 text-center">
+    <div class="col-md-4">
+        <div class="card feature-card h-100 p-4 border-0 shadow-sm">
+            <i class="bi bi-person-lines-fill display-6 text-warning mb-3"></i>
+            <h5>Build Your Profile</h5>
+            <p class="text-muted mb-0">Enter your age, gender, height and weight to calculate your personal BMR.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card feature-card h-100 p-4 border-0 shadow-sm">
+            <i class="bi bi-journal-text display-6 text-warning mb-3"></i>
+            <h5>Log What You Eat</h5>
+            <p class="text-muted mb-0">Quickly add food items and their calories throughout the day.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card feature-card h-100 p-4 border-0 shadow-sm">
+            <i class="bi bi-graph-up-arrow display-6 text-warning mb-3"></i>
+            <h5>Track Your Progress</h5>
+            <p class="text-muted mb-0">A live dashboard compares what you need vs. what you've consumed.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

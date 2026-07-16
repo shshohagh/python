@@ -1,0 +1,46 @@
+{% extends 'CalApp/base.html' %}
+{% load static %}
+{% block title %}Login | Calorie Counter{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card auth-card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                <h3 class="fw-bold text-center mb-4"><i class="bi bi-box-arrow-in-right"></i> Welcome Back</h3>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div class="{% if field.name == 'password' %}input-group{% endif %}">
+                                {{ field }}
+                                {% if field.name == 'password' %}
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="{{ field.id_for_label }}">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger py-2">{{ error }}</div>
+                    {% endfor %}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-warning fw-semibold">Log In</button>
+                    </div>
+                </form>
+                <p class="text-center text-muted mt-4 mb-0">
+                    Don't have an account? <a href="{% url 'register' %}">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'CalApp/js/auth.js' %}"></script>
+{% endblock %}

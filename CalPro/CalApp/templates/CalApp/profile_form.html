@@ -1,0 +1,31 @@
+{% extends 'CalApp/base.html' %}
+{% block title %}Your Profile | Calorie Counter{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card auth-card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                <h3 class="fw-bold text-center mb-2"><i class="bi bi-person-lines-fill"></i> {% if profile %}Update Your Profile{% else %}Complete Your Profile{% endif %}</h3>
+                <p class="text-muted text-center mb-4">We use this to calculate your daily calorie requirement (BMR).</p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="row">
+                        {% for field in form %}
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-warning fw-semibold">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
