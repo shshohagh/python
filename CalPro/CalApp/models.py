@@ -32,8 +32,23 @@ class Profile(models.Model):
         return self.name
 
 
+class Category(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
+    name = models.CharField(max_length=100)
+    color = models.CharField(max_length=50, default='primary')
+    icon = models.CharField(max_length=150, default='<i class="bi bi-tag fs-4"></i>')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class CalorieEntry(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='calorie_entries')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='entries')
     item_name = models.CharField(max_length=150)
     calories = models.PositiveIntegerField()
     date = models.DateField(default=timezone.localdate)

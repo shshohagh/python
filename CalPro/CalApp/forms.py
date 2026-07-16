@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import CalorieEntry, Profile
+from .models import CalorieEntry, Profile, Category
 
 
 class RegisterForm(UserCreationForm):
@@ -67,15 +67,43 @@ class ProfileForm(forms.ModelForm):
     field_order = ['name', 'age', 'gender', 'height_ft', 'height_cm', 'weight_kg']
 
 
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name', 'color', 'icon']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Breakfast'}),
+            'color': forms.Select(choices=[
+                ('primary', 'Blue (Primary)'),
+                ('secondary', 'Gray (Secondary)'),
+                ('success', 'Green (Success)'),
+                ('danger', 'Red (Danger)'),
+                ('warning', 'Yellow (Warning)'),
+                ('info', 'Light Blue (Info)'),
+                ('dark', 'Dark'),
+            ], attrs={'class': 'form-select'}),
+            'icon': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '<i class="bi bi-tag fs-4"></i>'}),
+        }
+
+
 class CalorieEntryForm(forms.ModelForm):
     class Meta:
         model = CalorieEntry
-        fields = ['item_name', 'calories']
+        fields = ['category', 'item_name', 'calories']
         widgets = {
+            'category': forms.Select(attrs={'class': 'form-select'}),
             'item_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Chicken Sandwich'}),
             'calories': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 450'}),
         }
         labels = {
+            'category': 'Meal Category',
             'item_name': 'Item Name',
             'calories': 'Calories Consumed',
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['category'].queryset = Category.objects.filter(user=user)
+            self.fields['category'].empty_label = "Select a Category"

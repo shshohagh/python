@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
-                    var row = entriesBody.querySelector('tr[data-entry-id="' + id + '"]');
+                    var row = entriesBody.querySelector('[data-entry-id="' + id + '"]');
                     if (row) row.remove();
                     toggleEmptyState();
                     updateTotals(data);
@@ -68,10 +68,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function attachEditHandler(button) {
         button.addEventListener('click', function () {
             var id = button.getAttribute('data-id');
+            var catId = button.getAttribute('data-category');
             var name = button.getAttribute('data-name');
             var calories = button.getAttribute('data-calories');
 
             document.getElementById('editEntryId').value = id;
+            var catSelect = document.getElementById('editCategory');
+            if (catSelect) catSelect.value = catId;
             document.getElementById('editItemName').value = name;
             document.getElementById('editCalories').value = calories;
 
@@ -114,15 +117,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     var entry = result.data.entry;
-                    var row = document.createElement('tr');
+                    var catColor = entry.category && entry.category.color ? entry.category.color : 'primary';
+                    var catIcon = entry.category && entry.category.icon ? entry.category.icon : '<i class="bi bi-tag fs-4"></i>';
+                    var catName = entry.category && entry.category.name ? entry.category.name : 'Uncategorized';
+                    var catId = entry.category && entry.category.id ? entry.category.id : '';
+
+                    var row = document.createElement('div');
                     row.setAttribute('data-entry-id', entry.id);
-                    row.className = 'entry-new';
+                    row.className = 'd-flex align-items-center gap-3 p-3 rounded bg-white shadow-sm border-0 mb-3 food-log-item entry-new';
                     row.innerHTML =
-                        '<td class="item-name">' + entry.item_name + '</td>' +
-                        '<td class="item-calories">' + entry.calories + ' kcal</td>' +
-                        '<td class="text-end text-nowrap">' +
-                        '<button class="btn btn-sm btn-outline-primary edit-entry-btn me-1" data-id="' + entry.id + '" data-name="' + entry.item_name + '" data-calories="' + entry.calories + '"><i class="bi bi-pencil"></i></button>' +
-                        '<button class="btn btn-sm btn-outline-danger delete-entry-btn" data-id="' + entry.id + '"><i class="bi bi-trash"></i></button></td>';
+                        '<div class="bg-' + catColor + ' text-white rounded d-flex align-items-center justify-content-center flex-shrink-0 item-icon-wrapper" style="width: 48px; height: 48px;">' +
+                            catIcon +
+                        '</div>' +
+                        '<div class="flex-grow-1 overflow-hidden">' +
+                            '<div class="fw-bold fs-5 text-truncate item-category-name">' + catName + '</div>' +
+                            '<div class="small text-muted text-truncate item-name">' + entry.item_name + '</div>' +
+                        '</div>' +
+                        '<div class="ms-auto d-flex align-items-center gap-3">' +
+                            '<div class="fw-bold fs-5 text-nowrap item-calories">' + entry.calories + ' kcal</div>' +
+                            '<div class="text-nowrap flex-shrink-0">' +
+                                '<button class="btn btn-sm btn-outline-primary edit-entry-btn rounded-circle" style="width: 32px; height: 32px; padding: 0;" data-id="' + entry.id + '" data-category="' + catId + '" data-name="' + entry.item_name + '" data-calories="' + entry.calories + '">' +
+                                    '<i class="bi bi-pencil"></i>' +
+                                '</button>' +
+                                '<button class="btn btn-sm btn-outline-danger delete-entry-btn rounded-circle ms-1" style="width: 32px; height: 32px; padding: 0;" data-id="' + entry.id + '">' +
+                                    '<i class="bi bi-trash"></i>' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>';
                     entriesBody.prepend(row);
                     attachDeleteHandler(row.querySelector('.delete-entry-btn'));
                     attachEditHandler(row.querySelector('.edit-entry-btn'));
@@ -169,12 +190,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     var entry = result.data.entry;
-                    var row = entriesBody.querySelector('tr[data-entry-id="' + id + '"]');
+                    var row = entriesBody.querySelector('[data-entry-id="' + id + '"]');
                     if (row) {
+                        var catColor = entry.category && entry.category.color ? entry.category.color : 'primary';
+                        var catIcon = entry.category && entry.category.icon ? entry.category.icon : '<i class="bi bi-tag fs-4"></i>';
+                        var catName = entry.category && entry.category.name ? entry.category.name : 'Uncategorized';
+                        var catId = entry.category && entry.category.id ? entry.category.id : '';
+
+                        var iconWrapper = row.querySelector('.item-icon-wrapper');
+                        if (iconWrapper) {
+                            iconWrapper.className = 'bg-' + catColor + ' text-white rounded d-flex align-items-center justify-content-center flex-shrink-0 item-icon-wrapper';
+                            iconWrapper.innerHTML = catIcon;
+                        }
+
+                        var catNameEl = row.querySelector('.item-category-name');
+                        if (catNameEl) catNameEl.textContent = catName;
+
                         row.querySelector('.item-name').textContent = entry.item_name;
                         row.querySelector('.item-calories').textContent = entry.calories + ' kcal';
                         var editBtn = row.querySelector('.edit-entry-btn');
                         if (editBtn) {
+                            editBtn.setAttribute('data-category', catId);
                             editBtn.setAttribute('data-name', entry.item_name);
                             editBtn.setAttribute('data-calories', entry.calories);
                         }

@@ -5,8 +5,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .forms import CalorieEntryForm, LoginForm, ProfileForm, RegisterForm
-from .models import CalorieEntry, Profile
+from .forms import CalorieEntryForm, LoginForm, ProfileForm, RegisterForm, CategoryForm
+from .models import CalorieEntry, Profile, Category
 
 
 def home(request):
@@ -96,7 +96,7 @@ def dashboard_view(request):
     else:
         guideline = "You're right on track with your daily target!"
 
-    entry_form = CalorieEntryForm()
+    entry_form = CalorieEntryForm(user=request.user)
 
     return render(request, 'CalApp/dashboard.html', {
         'profile': profile,
@@ -115,7 +115,7 @@ def add_calorie_entry(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid method'}, status=405)
 
-    form = CalorieEntryForm(request.POST)
+    form = CalorieEntryForm(request.POST, user=request.user)
     if not form.is_valid():
         return JsonResponse({'errors': form.errors}, status=400)
 
@@ -138,11 +138,19 @@ def add_calorie_entry(request):
     else:
         guideline = "You're right on track with your daily target!"
 
+    category_data = {
+        'id': entry.category.id if entry.category else None,
+        'name': entry.category.name if entry.category else 'Uncategorized',
+        'color': entry.category.color if entry.category else 'secondary',
+        'icon': entry.category.icon if entry.category else '<i class="bi bi-tag fs-4"></i>',
+    }
+
     return JsonResponse({
         'entry': {
             'id': entry.id,
             'item_name': entry.item_name,
             'calories': entry.calories,
+            'category': category_data,
         },
         'consumed': consumed,
         'required': required,
@@ -190,7 +198,7 @@ def edit_calorie_entry(request, entry_id):
         return JsonResponse({'error': 'Invalid method'}, status=405)
 
     entry = get_object_or_404(CalorieEntry, id=entry_id, user=request.user)
-    form = CalorieEntryForm(request.POST, instance=entry)
+    form = CalorieEntryForm(request.POST, instance=entry, user=request.user)
     if not form.is_valid():
         return JsonResponse({'errors': form.errors}, status=400)
 
@@ -211,11 +219,19 @@ def edit_calorie_entry(request, entry_id):
     else:
         guideline = "You're right on track with your daily target!"
 
+    category_data = {
+        'id': entry.category.id if entry.category else None,
+        'name': entry.category.name if entry.category else 'Uncategorized',
+        'color': entry.category.color if entry.category else 'secondary',
+        'icon': entry.category.icon if entry.category else '<i class="bi bi-tag fs-4"></i>',
+    }
+
     return JsonResponse({
         'entry': {
             'id': entry.id,
             'item_name': entry.item_name,
             'calories': entry.calories,
+            'category': category_data,
         },
         'consumed': consumed,
         'required': required,
@@ -225,3 +241,45 @@ def edit_calorie_entry(request, entry_id):
     })
 
 
+
+
+@login_required
+def category_list(request):
+    categories = Category.objects.filter(user=request.user)
+    form = CategoryForm()
+    return render(request, 'CalApp/category_list.html', {'categories': categories, 'form': form})
+
+@login_required
+def category_add(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save(commit=False)
+            category.user = request.user
+            category.save()
+            messages.success(request, 'Category added successfully.')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    return redirect('category_list')
+
+@login_required
+def category_edit(request, category_id):
+    category = get_object_or_404(Category, id=category_id, user=request.user)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category updated successfully.')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    return redirect('category_list')
+
+@login_required
+def category_delete(request, category_id):
+    category = get_object_or_404(Category, id=category_id, user=request.user)
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, 'Category deleted successfully.')
+    return redirect('category_list')

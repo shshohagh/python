@@ -12,4 +12,9 @@ urlpatterns = [
     path('dashboard/add/', views.add_calorie_entry, name='add_calorie_entry'),
     path('dashboard/edit/<int:entry_id>/', views.edit_calorie_entry, name='edit_calorie_entry'),
     path('dashboard/delete/<int:entry_id>/', views.delete_calorie_entry, name='delete_calorie_entry'),
+    
+    path('categories/', views.category_list, name='category_list'),
+    path('categories/add/', views.category_add, name='category_add'),
+    path('categories/edit/<int:category_id>/', views.category_edit, name='category_edit'),
+    path('categories/delete/<int:category_id>/', views.category_delete, name='category_delete'),
 ]

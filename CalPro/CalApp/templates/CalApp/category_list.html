@@ -1,0 +1,132 @@
+{% extends 'CalApp/base.html' %}
+{% load static %}
+{% block title %}Categories | Calorie Counter{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+        <h2 class="fw-extrabold mb-0"><span class="text-primary-gradient">Manage Categories</span></h2>
+        <p class="text-muted mb-0">Create and organize your meal categories.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm glass-card-float" style="animation: none;">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4">Add New Category</h5>
+                <form action="{% url 'category_add' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">Category Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">Color</label>
+                        {{ form.color }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">Icon HTML</label>
+                        <div class="input-group">
+                            {{ form.icon }}
+                            <a href="https://icons.getbootstrap.com/" target="_blank" class="btn btn-outline-primary d-flex align-items-center" title="Browse Bootstrap Icons">
+                                <i class="bi bi-search me-1"></i>
+                            </a>
+                        </div>
+                        <div class="form-text">Paste HTML e.g. <code>&lt;i class="bi bi-egg-fried fs-4"&gt;&lt;/i&gt;</code></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">Add Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm glass-card-float" style="animation: none;">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4">Your Categories</h5>
+                {% if categories %}
+                <div class="row g-3">
+                    {% for category in categories %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-3 p-3 rounded bg-light-subtle border border-light h-100">
+                            <div class="bg-{{ category.color }} text-white rounded d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                                {{ category.icon|safe }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold fs-5">{{ category.name }}</div>
+                            </div>
+                            <div class="dropdown flex-shrink-0">
+                                <button class="btn btn-sm btn-link text-muted text-decoration-none" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editCatModal{{ category.id }}"><i class="bi bi-pencil me-2"></i> Edit</a></li>
+                                    <li>
+                                        <form action="{% url 'category_delete' category.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash me-2"></i> Delete</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Edit Modal -->
+                    <div class="modal fade" id="editCatModal{{ category.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow glass-card-float" style="animation: none;">
+                                <form action="{% url 'category_edit' category.id %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Edit Category</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted small fw-semibold">Category Name</label>
+                                            <input type="text" name="name" class="form-control" value="{{ category.name }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted small fw-semibold">Color</label>
+                                            <select name="color" class="form-select">
+                                                <option value="primary" {% if category.color == 'primary' %}selected{% endif %}>Blue (Primary)</option>
+                                                <option value="secondary" {% if category.color == 'secondary' %}selected{% endif %}>Gray (Secondary)</option>
+                                                <option value="success" {% if category.color == 'success' %}selected{% endif %}>Green (Success)</option>
+                                                <option value="danger" {% if category.color == 'danger' %}selected{% endif %}>Red (Danger)</option>
+                                                <option value="warning" {% if category.color == 'warning' %}selected{% endif %}>Yellow (Warning)</option>
+                                                <option value="info" {% if category.color == 'info' %}selected{% endif %}>Light Blue (Info)</option>
+                                                <option value="dark" {% if category.color == 'dark' %}selected{% endif %}>Dark</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted small fw-semibold">Icon HTML</label>
+                                            <div class="input-group">
+                                                <input type="text" name="icon" class="form-control" value="{{ category.icon }}">
+                                                <a href="https://icons.getbootstrap.com/" target="_blank" class="btn btn-outline-primary d-flex align-items-center" title="Browse Bootstrap Icons">
+                                                    <i class="bi bi-search me-1"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-0">
+                                        <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary fw-semibold">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-5 mb-0">
+                    No categories created yet. Add one from the left panel!
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
