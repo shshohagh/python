@@ -91,13 +91,18 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
             if (formAlert) formAlert.classList.add('d-none');
 
+            var formData = new FormData(form);
+            if (window.TARGET_DATE) {
+                formData.append('date', window.TARGET_DATE);
+            }
+
             fetch(window.CALORIE_URLS.add, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCsrfToken(form),
                     'X-Requested-With': 'XMLHttpRequest',
                 },
-                body: new FormData(form),
+                body: formData,
             })
                 .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
                 .then(function (result) {
@@ -220,6 +225,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (editModal) editModal.hide();
                     if (window.showToast) window.showToast('Item updated successfully.', 'success');
                 });
+        });
+    }
+
+    var waterBtns = document.querySelectorAll('.water-btn');
+    var waterGlasses = document.getElementById('waterGlasses');
+    
+    if (waterBtns.length > 0) {
+        waterBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var action = btn.getAttribute('data-action');
+                var formData = new FormData();
+                formData.append('action', action);
+                if (window.TARGET_DATE) formData.append('date', window.TARGET_DATE);
+                
+                fetch(window.CALORIE_URLS.updateWater, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(document.body),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.glasses !== undefined && waterGlasses) {
+                        waterGlasses.textContent = data.glasses;
+                    }
+                });
+            });
         });
     }
 });

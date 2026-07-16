@@ -1,12 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from datetime import datetime, timedelta
+import csv
 
 from .forms import CalorieEntryForm, LoginForm, ProfileForm, RegisterForm, CategoryForm
-from .models import CalorieEntry, Profile, Category
+from .models import CalorieEntry, Profile, Category, WaterLog
 
 
 def home(request):
@@ -81,8 +83,19 @@ def dashboard_view(request):
         messages.info(request, 'Please complete your profile first.')
         return redirect('profile_setup')
 
-    today = timezone.localdate()
-    entries = CalorieEntry.objects.filter(user=request.user, date=today)
+    date_str = request.GET.get('date')
+    if date_str:
+        try:
+            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            target_date = timezone.localdate()
+    else:
+        target_date = timezone.localdate()
+
+    prev_date = target_date - timedelta(days=1)
+    next_date = target_date + timedelta(days=1)
+
+    entries = CalorieEntry.objects.filter(user=request.user, date=target_date)
     consumed = sum(entry.calories for entry in entries)
     required = profile.bmr()
     percent = min(round((consumed / required) * 100), 100) if required else 0
@@ -96,6 +109,7 @@ def dashboard_view(request):
     else:
         guideline = "You're right on track with your daily target!"
 
+    water_log, _ = WaterLog.objects.get_or_create(user=request.user, date=target_date)
     entry_form = CalorieEntryForm(user=request.user)
 
     return render(request, 'CalApp/dashboard.html', {
@@ -107,6 +121,10 @@ def dashboard_view(request):
         'percent': percent,
         'guideline': guideline,
         'entry_form': entry_form,
+        'target_date': target_date,
+        'prev_date': prev_date,
+        'next_date': next_date,
+        'water_glasses': water_log.glasses,
     })
 
 
@@ -119,13 +137,22 @@ def add_calorie_entry(request):
     if not form.is_valid():
         return JsonResponse({'errors': form.errors}, status=400)
 
+    date_str = request.POST.get('date')
+    if date_str:
+        try:
+            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            target_date = timezone.localdate()
+    else:
+        target_date = timezone.localdate()
+
     entry = form.save(commit=False)
     entry.user = request.user
+    entry.date = target_date
     entry.save()
 
     profile = get_object_or_404(Profile, user=request.user)
-    today = timezone.localdate()
-    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=today))
+    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=target_date))
     required = profile.bmr()
 
     percent = min(round((consumed / required) * 100), 100) if required else 0
@@ -166,11 +193,11 @@ def delete_calorie_entry(request, entry_id):
         return JsonResponse({'error': 'Invalid method'}, status=405)
 
     entry = get_object_or_404(CalorieEntry, id=entry_id, user=request.user)
+    target_date = entry.date
     entry.delete()
 
     profile = get_object_or_404(Profile, user=request.user)
-    today = timezone.localdate()
-    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=today))
+    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=target_date))
     required = profile.bmr()
 
     percent = min(round((consumed / required) * 100), 100) if required else 0
@@ -203,10 +230,10 @@ def edit_calorie_entry(request, entry_id):
         return JsonResponse({'errors': form.errors}, status=400)
 
     entry = form.save()
+    target_date = entry.date
 
     profile = get_object_or_404(Profile, user=request.user)
-    today = timezone.localdate()
-    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=today))
+    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=target_date))
     required = profile.bmr()
 
     percent = min(round((consumed / required) * 100), 100) if required else 0
@@ -283,3 +310,37 @@ def category_delete(request, category_id):
         category.delete()
         messages.success(request, 'Category deleted successfully.')
     return redirect('category_list')
+
+@login_required
+def update_water(request):
+    if request.method == 'POST':
+        date_str = request.POST.get('date')
+        action = request.POST.get('action')
+        try:
+            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            target_date = timezone.localdate()
+            
+        water_log, _ = WaterLog.objects.get_or_create(user=request.user, date=target_date)
+        if action == 'add':
+            water_log.glasses += 1
+        elif action == 'subtract' and water_log.glasses > 0:
+            water_log.glasses -= 1
+        water_log.save()
+        return JsonResponse({'glasses': water_log.glasses})
+    return JsonResponse({'error': 'Invalid method'}, status=405)
+
+@login_required
+def export_data(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="calorie_data.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Date', 'Category', 'Item Name', 'Calories'])
+
+    entries = CalorieEntry.objects.filter(user=request.user).order_by('-date', '-created_at')
+    for entry in entries:
+        category_name = entry.category.name if entry.category else 'Uncategorized'
+        writer.writerow([entry.date, category_name, entry.item_name, entry.calories])
+
+    return response

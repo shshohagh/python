@@ -51,20 +51,22 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['name', 'age', 'gender', 'height_cm', 'weight_kg']
+        fields = ['name', 'age', 'gender', 'height_cm', 'weight_kg', 'target_weight_kg']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'age': forms.NumberInput(attrs={'class': 'form-control'}),
             'gender': forms.Select(attrs={'class': 'form-select'}),
             'height_cm': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'id': 'height_cm_input'}),
             'weight_kg': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+            'target_weight_kg': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
         }
         labels = {
             'height_cm': 'Height (cm)',
-            'weight_kg': 'Weight (kg)',
+            'weight_kg': 'Current Weight (kg)',
+            'target_weight_kg': 'Target Weight (kg)',
         }
     
-    field_order = ['name', 'age', 'gender', 'height_ft', 'height_cm', 'weight_kg']
+    field_order = ['name', 'age', 'gender', 'height_ft', 'height_cm', 'weight_kg', 'target_weight_kg']
 
 
 class CategoryForm(forms.ModelForm):
@@ -89,16 +91,22 @@ class CategoryForm(forms.ModelForm):
 class CalorieEntryForm(forms.ModelForm):
     class Meta:
         model = CalorieEntry
-        fields = ['category', 'item_name', 'calories']
+        fields = ['category', 'item_name', 'calories', 'protein', 'carbs', 'fats']
         widgets = {
             'category': forms.Select(attrs={'class': 'form-select'}),
             'item_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Chicken Sandwich'}),
-            'calories': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 450'}),
+            'calories': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'kcal'}),
+            'protein': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'g'}),
+            'carbs': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'g'}),
+            'fats': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'g'}),
         }
         labels = {
             'category': 'Meal Category',
             'item_name': 'Item Name',
-            'calories': 'Calories Consumed',
+            'calories': 'Calories',
+            'protein': 'Protein (g)',
+            'carbs': 'Carbs (g)',
+            'fats': 'Fats (g)',
         }
 
     def __init__(self, *args, **kwargs):

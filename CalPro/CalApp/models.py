@@ -15,6 +15,7 @@ class Profile(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     height_cm = models.DecimalField(max_digits=5, decimal_places=1)
     weight_kg = models.DecimalField(max_digits=5, decimal_places=1)
+    target_weight_kg = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -51,6 +52,9 @@ class CalorieEntry(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='entries')
     item_name = models.CharField(max_length=150)
     calories = models.PositiveIntegerField()
+    protein = models.PositiveIntegerField(default=0)
+    carbs = models.PositiveIntegerField(default=0)
+    fats = models.PositiveIntegerField(default=0)
     date = models.DateField(default=timezone.localdate)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -59,3 +63,28 @@ class CalorieEntry(models.Model):
 
     def __str__(self):
         return f'{self.item_name} ({self.calories} kcal)'
+
+
+class WaterLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='water_logs')
+    date = models.DateField(default=timezone.localdate)
+    glasses = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        unique_together = ('user', 'date')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.date}: {self.glasses} glasses"
+
+
+class WeightLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='weight_logs')
+    date = models.DateField(default=timezone.localdate)
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=1)
+
+    class Meta:
+        unique_together = ('user', 'date')
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date}: {self.weight_kg} kg"

@@ -17,4 +17,7 @@ urlpatterns = [
     path('categories/add/', views.category_add, name='category_add'),
     path('categories/edit/<int:category_id>/', views.category_edit, name='category_edit'),
     path('categories/delete/<int:category_id>/', views.category_delete, name='category_delete'),
+
+    path('water/update/', views.update_water, name='update_water'),
+    path('export/', views.export_data, name='export_data'),
 ]
