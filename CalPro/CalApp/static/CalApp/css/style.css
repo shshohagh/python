@@ -271,3 +271,49 @@ body {
     border-color: var(--brand-primary);
     background-color: rgba(255, 255, 255, 0.95);
 }
+
+/* Home Page Redesign Enhancements */
+.fw-extrabold {
+    font-weight: 800 !important;
+}
+
+.text-primary-gradient {
+    background: linear-gradient(135deg, var(--brand-primary), #4338ca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-warning-gradient {
+    background: linear-gradient(135deg, var(--brand-accent), #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glass-badge {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-card-float {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.blur-blob {
+    mix-blend-mode: multiply;
+}

@@ -184,3 +184,44 @@ def delete_calorie_entry(request, entry_id):
     })
 
 
+@login_required
+def edit_calorie_entry(request, entry_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+
+    entry = get_object_or_404(CalorieEntry, id=entry_id, user=request.user)
+    form = CalorieEntryForm(request.POST, instance=entry)
+    if not form.is_valid():
+        return JsonResponse({'errors': form.errors}, status=400)
+
+    entry = form.save()
+
+    profile = get_object_or_404(Profile, user=request.user)
+    today = timezone.localdate()
+    consumed = sum(e.calories for e in CalorieEntry.objects.filter(user=request.user, date=today))
+    required = profile.bmr()
+
+    percent = min(round((consumed / required) * 100), 100) if required else 0
+    if required == 0:
+        guideline = ''
+    elif consumed < required * 0.9:
+        guideline = "You're under your target today — good if you're aiming to lose weight, but eat a bit more if you want to maintain."
+    elif consumed > required * 1.1:
+        guideline = "You're over your target today — cut back if you're not intentionally trying to gain weight."
+    else:
+        guideline = "You're right on track with your daily target!"
+
+    return JsonResponse({
+        'entry': {
+            'id': entry.id,
+            'item_name': entry.item_name,
+            'calories': entry.calories,
+        },
+        'consumed': consumed,
+        'required': required,
+        'remaining': required - consumed,
+        'percent': percent,
+        'guideline': guideline,
+    })
+
+

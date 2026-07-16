@@ -5,7 +5,7 @@
 
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
     <div>
-        <h2 class="fw-bold mb-0">Hi, {{ profile.name }} <span class="wave">👋</span></h2>
+        <h2 class="fw-extrabold mb-0"><span class="text-primary-gradient">Hi, {{ profile.name }}</span> <span class="wave">👋</span></h2>
         <p class="text-muted mb-0">Here's your calorie summary for {% now "F j, Y" %}.</p>
     </div>
     <button type="button" class="btn btn-warning fw-semibold" data-bs-toggle="modal" data-bs-target="#addEntryModal">
@@ -15,50 +15,50 @@
 
 <div class="row g-4 mb-4">
     <div class="col-md-4">
-        <div class="card stat-card h-100 border-0 shadow-sm">
+        <div class="card stat-card h-100 border-0 shadow-sm glass-card-float" style="animation: none;">
             <div class="card-body">
-                <div class="text-muted small text-uppercase fw-semibold">Required Today (BMR)</div>
-                <div class="display-6 fw-bold" id="requiredValue">{{ required }}</div>
+                <div class="text-muted small text-uppercase fw-semibold"><i class="bi bi-bullseye text-primary me-1"></i> Required Today (BMR)</div>
+                <div class="display-6 fw-bold mt-2" id="requiredValue">{{ required }}</div>
                 <div class="text-muted small">kcal</div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card stat-card h-100 border-0 shadow-sm">
+        <div class="card stat-card h-100 border-0 shadow-sm glass-card-float" style="animation: none;">
             <div class="card-body">
-                <div class="text-muted small text-uppercase fw-semibold">Consumed Today</div>
-                <div class="display-6 fw-bold" id="consumedValue">{{ consumed }}</div>
+                <div class="text-muted small text-uppercase fw-semibold"><i class="bi bi-fire text-warning me-1"></i> Consumed Today</div>
+                <div class="display-6 fw-bold mt-2" id="consumedValue">{{ consumed }}</div>
                 <div class="text-muted small">kcal</div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card stat-card h-100 border-0 shadow-sm">
+        <div class="card stat-card h-100 border-0 shadow-sm glass-card-float" style="animation: none;">
             <div class="card-body">
-                <div class="text-muted small text-uppercase fw-semibold">Remaining</div>
-                <div class="display-6 fw-bold" id="remainingValue">{{ remaining }}</div>
+                <div class="text-muted small text-uppercase fw-semibold"><i class="bi bi-battery-half text-success me-1"></i> Remaining</div>
+                <div class="display-6 fw-bold mt-2" id="remainingValue">{{ remaining }}</div>
                 <div class="text-muted small">kcal</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm mb-4">
+<div class="card border-0 shadow-sm mb-4 glass-card-float" style="animation: none;">
     <div class="card-body">
         <div class="d-flex justify-content-between mb-2">
             <span class="fw-semibold">Daily Progress</span>
-            <span id="percentLabel">{{ percent }}%</span>
+            <span id="percentLabel" class="fw-bold text-primary">{{ percent }}%</span>
         </div>
         <div class="progress" style="height: 1.25rem;" role="progressbar" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100">
             <div class="progress-bar {% if percent < 70 %}bg-success{% elif percent <= 100 %}bg-warning{% else %}bg-danger{% endif %}" id="progressBar" style="width: {{ percent }}%;"></div>
         </div>
-        <p class="mt-3 mb-0 text-muted" id="guidelineText">{{ guideline }}</p>
+        <p class="mt-3 mb-0 text-muted small" id="guidelineText">{{ guideline }}</p>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm glass-card-float" style="animation: none;">
     <div class="card-body">
-        <h5 class="fw-bold mb-3"><i class="bi bi-journal-text"></i> Today's Food Log</h5>
+        <h5 class="fw-extrabold mb-3"><i class="bi bi-journal-text text-primary"></i> <span class="text-primary-gradient">Today's Food Log</span></h5>
         <div class="table-responsive">
             <table class="table align-middle" id="entriesTable">
                 <thead>
@@ -71,9 +71,12 @@
                 <tbody id="entriesBody">
                     {% for entry in entries %}
                     <tr data-entry-id="{{ entry.id }}">
-                        <td>{{ entry.item_name }}</td>
-                        <td>{{ entry.calories }} kcal</td>
-                        <td class="text-end">
+                        <td class="item-name">{{ entry.item_name }}</td>
+                        <td class="item-calories">{{ entry.calories }} kcal</td>
+                        <td class="text-end text-nowrap">
+                            <button class="btn btn-sm btn-outline-primary edit-entry-btn me-1" data-id="{{ entry.id }}" data-name="{{ entry.item_name }}" data-calories="{{ entry.calories }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
                             <button class="btn btn-sm btn-outline-danger delete-entry-btn" data-id="{{ entry.id }}">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -118,12 +121,44 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Entry Modal -->
+<div class="modal fade" id="editEntryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editEntryForm">
+                <input type="hidden" id="editEntryId" name="entry_id">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square text-primary"></i> <span class="text-primary-gradient">Edit Food Item</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="editFormAlert" class="alert alert-danger py-2 d-none"></div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editItemName">Item Name</label>
+                        <input type="text" name="item_name" class="form-control" id="editItemName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editCalories">Calories Consumed</label>
+                        <input type="number" name="calories" class="form-control" id="editCalories" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fw-semibold">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
     window.CALORIE_URLS = {
         add: "{% url 'add_calorie_entry' %}",
+        editBase: "{% url 'edit_calorie_entry' 0 %}".replace('0/', ''),
         deleteBase: "{% url 'delete_calorie_entry' 0 %}".replace('0/', ''),
     };
 </script>

@@ -2,11 +2,16 @@
 {% load static %}
 {% block title %}Login | Calorie Counter{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card auth-card shadow-sm border-0">
-            <div class="card-body p-4 p-md-5">
-                <h3 class="fw-bold text-center mb-4"><i class="bi bi-box-arrow-in-right"></i> Welcome Back</h3>
+<div class="position-relative py-4 py-lg-5">
+    <!-- Decorative background blobs -->
+    <div class="position-absolute top-0 end-0 bg-warning rounded-circle blur-blob" style="width: 250px; height: 250px; opacity: 0.15; filter: blur(50px); transform: translate(30%, -30%); z-index: -1;"></div>
+    <div class="position-absolute bottom-0 start-0 bg-primary rounded-circle blur-blob" style="width: 300px; height: 300px; opacity: 0.15; filter: blur(60px); transform: translate(-30%, 30%); z-index: -1;"></div>
+
+    <div class="row justify-content-center position-relative z-1">
+        <div class="col-md-6 col-lg-5">
+            <div class="card auth-card shadow-lg border-0 glass-card-float" style="animation: none;">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="fw-extrabold text-center mb-4"><i class="bi bi-box-arrow-in-right text-warning"></i> <span class="text-primary-gradient">Welcome Back</span></h3>
                 <form method="post" novalidate>
                     {% csrf_token %}
                     {% for field in form %}

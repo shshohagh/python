@@ -9,17 +9,27 @@
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                 {% if user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'profile_setup' %}"><i class="bi bi-person-circle"></i> Profile</a></li>
-                    <li class="nav-item">
-                        <form action="{% url 'logout' %}" method="post" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-outline-danger ms-lg-2">Logout</button>
-                        </form>
-                    </li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'profile_setup' %}">
+                        <i class="bi bi-person-circle"></i> Profile
+                    </a></li>
+                <li class="nav-item">
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm text-danger ms-lg-2">
+                            <i class="bi bi-box-arrow-in-left"></i> Logout
+                        </button>
+                    </form>
+                </li>
                 {% else %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-                    <li class="nav-item"><a class="btn btn-sm btn-warning ms-lg-2" href="{% url 'register' %}">Sign Up</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a></li>
+                <li class="nav-item"><a class="btn btn-sm btn-warning ms-lg-2" href="{% url 'register' %}">
+                        <i class="bi bi-person-fill-add"></i> Sign Up
+                    </a></li>
                 {% endif %}
             </ul>
         </div>
